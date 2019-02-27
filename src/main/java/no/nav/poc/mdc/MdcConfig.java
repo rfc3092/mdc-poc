@@ -1,8 +1,6 @@
 package no.nav.poc.mdc;
 
 
-import java.util.HashSet;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -21,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class MdcConfig {
 
+    @SuppressWarnings({"EmptyMethod", "unused"})
     @Pointcut(value = "@annotation(MyCustomMdcAnnotation)")
     public void pointCutForMethodsAnnotatedWithMyCustomMdcAnnotation() {
     }
@@ -33,7 +32,7 @@ public class MdcConfig {
             MdcContextProvider provider = (MdcContextProvider) joinPoint.getTarget();
             log.info("Using provider {}", provider.getClass().getName());
             provider
-                .getMdcContextMap()
+                .getMdcContextMap(joinPoint.getArgs())
                 .forEach(MDC::put);
         } else {
             logIncorrectUsage(joinPoint.getTarget().getClass().getName());
@@ -45,21 +44,17 @@ public class MdcConfig {
 
     @After("pointCutForMethodsAnnotatedWithMyCustomMdcAnnotation()")
     public void afterMethodsAnnotatedWithMyCustomMdcAnnotation(JoinPoint joinPoint) {
-        
+
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         MyCustomMdcAnnotation annotation = signature.getMethod().getAnnotation(MyCustomMdcAnnotation.class);
-        if (annotation != null && annotation.clear()) {
+        if (annotation.clear()) {
 
             if (joinPoint.getTarget() instanceof MdcContextProvider) {
                 MdcContextProvider provider = (MdcContextProvider) joinPoint.getTarget();
-                Set<String> removed = new HashSet<>();
                 provider
-                    .getMdcContextMap()
-                    .forEach((k, v) -> {
-                        MDC.remove(k);
-                        removed.add(k);
-                    });
-                log.info("Removed MDC key(s) {} after method {}", removed, signature.getDeclaringTypeName() + "." + signature.getName());
+                    .getMdcContextKeyset()
+                    .forEach(MDC::remove);
+                log.info("Removed MDC key(s) {} after method {}", provider.getMdcContextKeyset(), signature.getDeclaringTypeName() + "." + signature.getName());
             } else {
                 logIncorrectUsage(joinPoint.getTarget().getClass().getName());
             }

@@ -1,0 +1,23 @@
+<configuration>
+
+  <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <pattern>%-4r [%t] %5p %c{1} - %m%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="mdc" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <pattern>%-4r [%t] %5p %c{1} - %m - MDC: \(book.title=%X{book.title}, author.name=%X{author.name}\)%n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="no.nav.poc.domain" level="INFO" additivity="false">
+    <appender-ref ref="mdc"/>
+  </logger>
+
+  <root level="INFO">
+    <appender-ref ref="console"/>
+  </root>
+
+</configuration>
