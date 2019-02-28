@@ -32,6 +32,17 @@ public class BookServiceTest {
     }
 
     @Test
+    public void testMethodThatIsNotAnnotatedButWillUseAutoCloseableMdcContext() {
+
+        bookService.thisMethodIsNotAnnotatedButWillUseAutoCloseableMdcContext(BOOK);
+        log.info("Calls completed");
+
+        assertThat(MDC.getCopyOfContextMap())
+            .containsOnly(entry("author.name", BOOK.getAuthor().getName()));
+
+    }
+
+    @Test
     public void testMethodThatIsAnnotated() {
 
         bookService.thisMethodIsAnnotated(BOOK);

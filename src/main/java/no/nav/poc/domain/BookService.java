@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.poc.mdc.MdcContext;
 import no.nav.poc.mdc.MdcContextProvider;
 import no.nav.poc.mdc.MyCustomMdcAnnotation;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,13 @@ class BookService implements MdcContextProvider {
     void thisMethodIsNotAnnotated(Book book) {
         log.info("Handling book {} without annotation", book);
         authorService.thisMethodIsNotAnnotated(book.getAuthor());
+    }
+
+    void thisMethodIsNotAnnotatedButWillUseAutoCloseableMdcContext(Book book) {
+        log.info("Handling book {} with autocloseable", book);
+        try (MdcContext ignored = new MdcContext(Collections.singletonMap("book.title", book.getTitle()))) {
+            authorService.thismethodIsNotAnnotatedButWillUseMdcContext(book.getAuthor());
+        }
     }
 
     @MyCustomMdcAnnotation
