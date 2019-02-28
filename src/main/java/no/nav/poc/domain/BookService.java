@@ -3,7 +3,6 @@ package no.nav.poc.domain;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.poc.mdc.MdcContext;
@@ -43,21 +42,13 @@ class BookService implements MdcContextProvider {
     }
 
     @Override
-    public Set<String> getMdcContextKeyset() {
-        return Collections.singleton("book.title");
-    }
-
-    @Override
     public Map<String, String> getMdcContextMap(Object[] args) {
-
-        String bookTitle = Arrays
+        return Arrays
             .stream(args)
             .filter(Book.class::isInstance)
             .findFirst()
             .map(Book.class::cast)
-            .map(Book::getTitle)
-            .orElse(null);
-        return Collections.singletonMap("book.title", bookTitle);
-
+            .map(book -> Collections.singletonMap("book.title", book.getTitle()))
+            .orElse(Collections.emptyMap());
     }
 }
